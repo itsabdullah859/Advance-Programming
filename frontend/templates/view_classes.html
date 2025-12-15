@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}View Classes - IntelliTrack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+            <div class="mb-4 sm:mb-0">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Class Management</h1>
+                <p class="text-gray-600">Manage classes and view student enrollment</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ url_for('add_class') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Class
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Classes Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for class_info in classes %}
+            <div class="card-shadow bg-white rounded-xl p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{{ url_for('edit_class', id=class_info.id) }}"
+                           class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="confirmDelete({{ class_info.id }}, '{{ class_info.name }}', {{ class_info.student_count }})"
+                               class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ class_info.name }}</h3>
+                    {% if class_info.description %}
+                        <p class="text-gray-600 text-sm">{{ class_info.description }}</p>
+                    {% else %}
+                        <p class="text-gray-400 text-sm italic">No description</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-users mr-2"></i>
+                        <span>{{ class_info.student_count }} student{{ 's' if class_info.student_count != 1 else '' }}</span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Created {{ class_info.created_at[:10] if class_info.created_at else 'N/A' }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not classes %}
+        <div class="text-center py-16">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-graduation-cap text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No Classes Found</h3>
+            <p class="text-gray-600 mb-8 max-w-md mx-auto">Get started by adding your first class to organize your students.</p>
+            <a href="{{ url_for('add_class') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <i class="fas fa-plus mr-2"></i>Add Your First Class
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Class</h3>
+                <p class="text-gray-600 mb-6" id="deleteMessage">Are you sure you want to delete this class? This action cannot be undone.</p>
+                <div class="flex gap-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <a id="confirmDeleteBtn" href="#" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(classId, className, studentCount) {
+    let message = `Are you sure you want to delete "${className}"?`;
+    if (studentCount > 0) {
+        message += ` This class has ${studentCount} student(s) enrolled. Deleting it will affect these students.`;
+    }
+    message += ' This action cannot be undone.';
+
+    document.getElementById('deleteMessage').textContent = message;
+    document.getElementById('confirmDeleteBtn').href = `/delete-class/${classId}`;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}

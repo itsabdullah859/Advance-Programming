@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IntelliTrack{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    {% if session.logged_in %}
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{{ url_for('dashboard') }}" class="text-decoration-none flex items-center">
+                            <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-graduation-cap text-white text-sm"></i>
+                            </div>
+                            <h1 class="text-xl font-bold text-gray-900">IntelliTrack</h1>
+                        </a>
+                    </div>
+                    <!-- Navigation Menu -->
+                    <div class="hidden md:flex ml-10 space-x-8">
+                        <a href="{{ url_for('dashboard') }}" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-200">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                        </a>
+                        <a href="{{ url_for('view_students') }}" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-200">
+                            <i class="fas fa-users mr-2"></i>Students
+                        </a>
+                        <a href="{{ url_for('view_classes') }}" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-200">
+                            <i class="fas fa-graduation-cap mr-2"></i>Classes
+                        </a>
+                        <a href="{{ url_for('analytics') }}" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition duration-200">
+                            <i class="fas fa-chart-bar mr-2"></i>Analytics
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button type="button" id="mobile-menu-button" class="nav-link p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                    <span class="text-sm text-gray-600">Welcome, <span class="font-medium text-gray-900">{{ session.username }}</span></span>
+                    <a href="{{ url_for('logout') }}" class="nav-link px-4 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+                <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </a>
+                <a href="{{ url_for('view_students') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                    <i class="fas fa-users mr-2"></i>Students
+                </a>
+                <a href="{{ url_for('view_classes') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                    <i class="fas fa-graduation-cap mr-2"></i>Classes
+                </a>
+                <a href="{{ url_for('analytics') }}" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                    <i class="fas fa-chart-bar mr-2"></i>Analytics
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="relative">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="fixed top-4 right-4 z-50 space-y-2" id="toast-container">
+                {% for category, message in messages %}
+                    <div class="toast card-shadow bg-white border-l-4 {% if category == 'success' %}border-green-500{% else %}border-red-500{% endif %} p-4 rounded-lg max-w-sm animate-fade-in flex items-center justify-between">
+                        <div class="flex items-center flex-1">
+                            <div class="flex-shrink-0">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                {% else %}
+                                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                                {% endif %}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-800">{{ message }}</p>
+                            </div>
+                        </div>
+                        <button class="toast-close ml-3 text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-out {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+    </style>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('mobile-menu');
+            const button = document.getElementById('mobile-menu-button');
+            
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Toast functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const toasts = document.querySelectorAll('.toast');
+            const toastContainer = document.getElementById('toast-container');
+
+            // Function to remove toast
+            function removeToast(toast) {
+                toast.style.animation = 'fade-out 0.3s ease-out';
+                setTimeout(() => {
+                    toast.remove();
+                    // If no toasts left, hide container
+                    if (toastContainer && toastContainer.children.length === 0) {
+                        toastContainer.style.display = 'none';
+                    }
+                }, 300);
+            }
+
+            // Add close button functionality
+            toasts.forEach(toast => {
+                const closeBtn = toast.querySelector('.toast-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        removeToast(toast);
+                    });
+                }
+            });
+
+            // Auto-remove toasts after 5 seconds
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    removeToast(toast);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

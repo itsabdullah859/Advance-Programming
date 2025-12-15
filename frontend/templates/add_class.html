@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Add Class - IntelliTrack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Add New Class</h1>
+                <p class="text-gray-600">Create a new class for student enrollment</p>
+            </div>
+            <a href="{{ url_for('view_classes') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Classes
+            </a>
+        </div>
+
+        <!-- Form -->
+        <div class="card-shadow bg-white rounded-xl p-8">
+            <form method="POST" action="{{ url_for('add_class') }}" class="space-y-6">
+                <!-- Class Name -->
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Class Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-graduation-cap absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            required
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+                            placeholder="e.g., Grade 10-A, Class XII Science"
+                        >
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Enter a unique name for the class</p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Description <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-align-left absolute left-3 top-3 text-gray-400"></i>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="4"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 resize-none"
+                            placeholder="Describe the class focus, curriculum, or any special notes..."
+                        ></textarea>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Provide additional information about this class</p>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button
+                            type="submit"
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
+                            <i class="fas fa-save mr-2"></i>Create Class
+                        </button>
+                        <a
+                            href="{{ url_for('view_classes') }}"
+                            class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-200 text-center"
+                        >
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tips -->
+        <div class="mt-6 card-shadow bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <div class="flex items-start">
+                <i class="fas fa-lightbulb text-blue-600 text-xl mt-1 mr-3"></i>
+                <div>
+                    <h4 class="font-semibold text-blue-900 mb-2">Tips for Creating Classes</h4>
+                    <ul class="text-sm text-blue-800 space-y-1">
+                        <li>• Use clear, descriptive names (e.g., "Grade 10-A Mathematics")</li>
+                        <li>• Include grade level and section for easy identification</li>
+                        <li>• Add descriptions to help identify class focus or special programs</li>
+                        <li>• Class names must be unique across the system</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Class - IntelliTrack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Class</h1>
+                <p class="text-gray-600">Update class information for {{ class_info.name }}</p>
+            </div>
+            <a href="{{ url_for('view_classes') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Classes
+            </a>
+        </div>
+
+        <!-- Form -->
+        <div class="card-shadow bg-white rounded-xl p-8">
+            <form method="POST" action="{{ url_for('edit_class', id=class_info.id) }}" class="space-y-6">
+                <!-- Class Name -->
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Class Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-graduation-cap absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            required
+                            value="{{ class_info.name }}"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+                            placeholder="e.g., Grade 10-A, Class XII Science"
+                        >
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Enter a unique name for the class</p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Description <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-align-left absolute left-3 top-3 text-gray-400"></i>
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="4"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 resize-none"
+                            placeholder="Describe the class focus, curriculum, or any special notes..."
+                        >{{ class_info.description or '' }}</textarea>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Provide additional information about this class</p>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button
+                            type="submit"
+                            class="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                        >
+                            <i class="fas fa-save mr-2"></i>Update Class
+                        </button>
+                        <a
+                            href="{{ url_for('view_classes') }}"
+                            class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-200 text-center"
+                        >
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Class Information Summary -->
+        <div class="mt-6 card-shadow bg-gray-50 border border-gray-200 rounded-xl p-6">
+            <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                Class Information
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="text-gray-600">Class Name:</span>
+                    <span class="font-medium text-gray-900 ml-2">{{ class_info.name }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Created:</span>
+                    <span class="font-medium text-gray-900 ml-2">{{ class_info.created_at[:10] if class_info.created_at else 'N/A' }}</span>
+                </div>
+                <div class="md:col-span-2">
+                    <span class="text-gray-600">Description:</span>
+                    <span class="font-medium text-gray-900 ml-2">{{ class_info.description or 'No description provided' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
