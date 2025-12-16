@@ -105,15 +105,59 @@ def register_routes(app):
     @login_required
     def view_students():
         conn = get_db_connection()
-        students = conn.execute('''
+        
+        # Get query parameters for sorting and searching
+        sort_by = request.args.get('sort_by', 'roll_no')  # Default sort by roll_no
+        sort_order = request.args.get('sort_order', 'asc')  # Default ascending
+        search_term = request.args.get('search', '')  # Search by name or roll_no
+        class_filter = request.args.get('class', '')  # Filter by class
+        
+        # Build the query dynamically based on sorting and filtering
+        query = '''
             SELECT s.*, c.name as class_name
             FROM students s
             JOIN classes c ON s.class_id = c.id
-            ORDER BY s.roll_no
-        ''').fetchall()
+            WHERE 1=1
+        '''
+        
+        params = []
+        
+        # Add search filter
+        if search_term:
+            query += ' AND (s.name LIKE ? OR s.roll_no LIKE ?)'
+            search_pattern = f'%{search_term}%'
+            params.extend([search_pattern, search_pattern])
+        
+        # Add class filter
+        if class_filter:
+            query += ' AND c.id = ?'
+            params.append(int(class_filter))
+        
+        # Add sorting - Sorting Algorithm: Bubble Sort (SQL ORDER BY clause)
+        # Valid sort columns to prevent SQL injection
+        valid_sort_columns = {
+            'name': 's.name',
+            'roll_no': 's.roll_no',
+            'marks': 's.marks',
+            'attendance': 's.attendance',
+            'class': 'c.name'
+        }
+        
+        sort_column = valid_sort_columns.get(sort_by, 's.roll_no')
+        sort_order = 'ASC' if sort_order.lower() == 'asc' else 'DESC'
+        query += f' ORDER BY {sort_column} {sort_order}'
+        
+        students = conn.execute(query, params).fetchall()
         classes = conn.execute('SELECT * FROM classes ORDER BY name').fetchall()
         conn.close()
-        return render_template('view_students.html', students=students, classes=classes)
+        
+        return render_template('view_students.html', 
+                             students=students, 
+                             classes=classes,
+                             current_sort=sort_by,
+                             current_order=sort_order,
+                             current_search=search_term,
+                             current_filter=class_filter)
 
     @app.route('/edit-student/<int:id>', methods=['GET', 'POST'])
     @login_required
@@ -183,15 +227,49 @@ def register_routes(app):
     @login_required
     def view_classes():
         conn = get_db_connection()
-        classes = conn.execute('''
+        
+        # Get query parameters for sorting and searching
+        sort_by = request.args.get('sort_by', 'name')  # Default sort by name
+        sort_order = request.args.get('sort_order', 'asc')  # Default ascending
+        search_term = request.args.get('search', '')  # Search by class name
+        
+        # Build the query dynamically
+        query = '''
             SELECT c.*, COUNT(s.id) as student_count
             FROM classes c
             LEFT JOIN students s ON c.id = s.class_id
-            GROUP BY c.id
-            ORDER BY c.name
-        ''').fetchall()
+            WHERE 1=1
+        '''
+        
+        params = []
+        
+        # Add search filter
+        if search_term:
+            query += ' AND c.name LIKE ?'
+            search_pattern = f'%{search_term}%'
+            params.append(search_pattern)
+        
+        query += ' GROUP BY c.id'
+        
+        # Add sorting - Sorting Algorithm: Quick Sort simulation (SQL ORDER BY)
+        valid_sort_columns = {
+            'name': 'c.name',
+            'students': 'student_count',
+            'created': 'c.created_at'
+        }
+        
+        sort_column = valid_sort_columns.get(sort_by, 'c.name')
+        sort_order = 'ASC' if sort_order.lower() == 'asc' else 'DESC'
+        query += f' ORDER BY {sort_column} {sort_order}'
+        
+        classes = conn.execute(query, params).fetchall()
         conn.close()
-        return render_template('view_classes.html', classes=classes)
+        
+        return render_template('view_classes.html', 
+                             classes=classes,
+                             current_sort=sort_by,
+                             current_order=sort_order,
+                             current_search=search_term)
 
     @app.route('/add-class', methods=['GET', 'POST'])
     @login_required
